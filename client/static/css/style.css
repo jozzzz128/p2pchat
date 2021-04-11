@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&family=Raleway:wght@200;400;700&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Raleway';
+    box-sizing: border-box;
+}
+
+:root{
+    /*Colors*/
+    --purple: #616BEE;
+    --grey: #4c4e4e;
+    /*Values*/
+    --window-radius: 4px;
+    --window-shadow: 2px 2px 2px #000;
+    /*Prompt values*/
+    --window-background: rgba(0,0,0,0.5);
+    --prompt-background: #fff;
+    --prompt-title-color: var(--grey);
+    --prompt-title-size: 26px;
+    --prompt-text-color: var(--grey);
+    --prompt-text-size: 18px;
+    /*Loader*/
+    --loader-color: #333;
+    --
+}
+
+/*Global classes*/
+.flex-centered{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.blur{
+    filter: blur(4px);
+    animation: getBlur 0.2s linear;
+}
+
+/*Container*/
+#container{
+    width: 100%;
+    min-height: 100vh;
+}
+
+/*Prompt window*/
+.prompt-background{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: var(--window-background);
+    animation: appearTransparent 0.2s linear;
+    opacity: 1;
+}
+
+.prompt-background .prompt-window{
+    position: fixed;
+    display: none;
+    width: 90%;
+    height: 90%;
+    max-width: 800px;
+    max-height: 350px;
+    background: var(--prompt-background);
+    border-radius: var(--window-radius);
+    animation: appear 0.2s linear;
+}
+
+.prompt-background .prompt-window .content{
+    padding: 20px;
+}
+
+.prompt-background .prompt-window .content .info{
+    width: 100%;
+}
+
+.prompt-background .prompt-window .content .info h2{
+    font-family: 'Open Sans';
+    font-weight: bolder;
+    font-size: var(--prompt-title-size);
+    color: var(--prompt-title-color);
+    margin-bottom: 20px;
+}
+
+.prompt-background .prompt-window .content .info p{
+    color: var(--prompt-text-color);
+    font-size: var(--prompt-text-size);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.prompt-background .prompt-window .content .loader{
+    margin: 50px;
+}
+
+/*Display*/
+.prompt-background.open .prompt-window{
+    display: flex;
+}
+.prompt-background.close{
+    opacity: 0;
+    animation-delay: 1.5s; 
+    animation: getTransparent 0.5s linear;
+}
+.prompt-background.close .prompt-window{
+    opacity: 0;
+    animation: minimize 0.3s linear;
+}
