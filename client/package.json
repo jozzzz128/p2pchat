@@ -1,0 +1,30 @@
+{
+  "name": "p2pchat",
+  "version": "1.0.0",
+  "description": "A p2p images and messages chat using node js &amp;&amp; socket.io",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon client.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jozzzz128/p2pchat.git"
+  },
+  "author": "jozzzz128",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jozzzz128/p2pchat/issues"
+  },
+  "homepage": "https://github.com/jozzzz128/p2pchat#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "get-port-sync": "^1.0.1",
+    "ip": "^1.1.5",
+    "socket.io": "^4.0.1",
+    "socket.io-client": "^4.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
