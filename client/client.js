@@ -18,11 +18,11 @@ const server = require("socket.io-client");
 /*--SOCKET.IO--*/
 //Socket.IO Code 
 io.on("connection", socket => {
-
+    var connection = false;
     //Detect if connection is from web client or another client
     code.manageConnections(io, socket);
     //Detect if user disconnects
-    socket.on("disconnect", () => code.manageDisconnections(io, socket));
+    socket.on("disconnect", () => code.manageDisconnections(io, socket, connection));
 
     //Receive login data
     socket.on("login", data => {
@@ -30,13 +30,11 @@ io.on("connection", socket => {
             //Get user data
             const {username, password} = data;
             //Start connection with server (sending login data)
-            code.connectToHostServer(io, socket, {
+            connection = code.connectToHostServer(io, socket, {
                 username: username,
                 password: password,
                 addr: `${ip.address()}:${ports.client}`
             });
-            //When web client disconnects
-            socket.on("disconnect", () => code.manageDisconnections(io, socket, connection));
         } 
         //In case all gets fucked
         catch(e){ 
@@ -95,6 +93,8 @@ const code = {
         connection.on("active", active => {
             if(active) io.emit("active", active);
         });
+        //When web client disconnects
+        return connection;
     }
 }
 
@@ -112,6 +112,6 @@ app.get('/', (req, res) => {
 /*LISTEN SERVERS*/
 //Client
 client.listen(ports.client, () => {
-    console.log(`Listening on: ${ports.client}`);
+    console.log(`Listening on: ${ip.address()}:${ports.client}`);
 });
 //Server

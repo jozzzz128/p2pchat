@@ -1,0 +1,327 @@
+/*GLOBAL*/
+
+:root{
+    --form-input-padding: 20px;
+}
+
+
+#forms{
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: calc(100vh + 10px);
+    background: #fff;
+}
+
+#forms .on{
+    display: inline-block !important;
+}
+
+#forms .left{
+    animation: showLeft var(--aside-text-transition);
+}
+
+#forms .right{
+    animation: showRight var(--aside-text-transition);
+}
+#forms .hide-left{
+    opacity: 0;
+    display: inline-block !important;
+    animation: hideLeft var(--aside-text-transition);
+}
+#forms .hide-right{
+    opacity: 0;
+    display: inline-block !important;
+    animation: hideRight var(--aside-text-transition);
+}
+
+#forms button{
+    display: inline-block;
+    position: relative;
+    width: 60%;
+    padding: 15px;
+    border: 1px solid #fff;
+    color: #fff;
+    background: transparent;
+    border-radius: 100px;
+    outline: transparent;
+    cursor: pointer;
+}
+#forms button:focus{
+    animation: buttonPressed 0.2s;
+}
+#forms button span{
+    display: none;
+    font-family: 'Open Sans';
+    text-transform: uppercase;
+    font-size: 18px;
+}
+#forms button.disabled, button.disabled:focus{
+    cursor: default;
+    opacity: 0.5;
+    animation: none;
+}
+
+#forms button.loading{
+    font-size: 0px;
+    display: inline-block;
+}
+
+#forms button.loading span.on{
+    display: none !important;
+}
+
+#forms button.loading span.icon-spinner8{
+    display: inline-block;
+    animation: infiniteSpin 0.5s linear infinite;
+}
+
+/*--sidebar--*/
+#forms aside{
+    width: var(--aside-size);
+    height: 100%;
+    position: absolute;
+    overflow: hidden;
+    top: 0px;
+    left: 0px;
+    text-align: center;
+    background: var(--purple);
+    z-index: 2;
+}
+#forms aside.left{
+    left: 0px;
+    animation: moveToLeft var(--aside-animation-transition);
+}
+#forms aside.right{
+    left: calc(100% - var(--aside-size));
+    animation: moveToRight var(--aside-animation-transition);
+}
+
+#forms aside *{
+    z-index: 2;
+}
+#forms aside .background{
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background: var(--aside-wallpaper);
+    background-size: auto 100%;
+    background-attachment: fixed;
+    opacity: 0.5;
+    z-index: 1;
+}
+
+#forms aside .content{
+    width: 100%;
+}
+
+#forms aside .content .info{
+    width: var(--aside-size);
+    display: none;
+    padding: 40px;
+    color: #fff;
+    transform: translateX(0px);
+}
+#forms aside .content .info h2{
+    font-family: 'Open Sans';
+    font-weight: bolder;
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+#forms aside .content .info p{
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+/*--Login && Register form--*/
+#forms .form-content{
+    width: calc(100% - var(--aside-size));
+    height: 100vh;
+    position: absolute;
+    top: 0px;
+    left: var(--aside-size);
+    transition: 1s;
+}
+
+#forms .form-content .form{
+    display: none;
+    width: 100%;
+    text-align: center;
+    border-radius: var(--window-radius);
+}
+
+#forms .form-content .form h2{
+    color: var(--purple);
+    font-size: 40px;
+    font-family: 'Open Sans';
+}
+
+#forms .form-content .form .buttons{
+    margin: 30px;
+}
+
+#forms .form-content .form .buttons a{
+    display: inline-block;
+    font-size: 22px;
+    padding: 18px;
+    border-radius: 100%;
+    border: 2px solid #f0f0f0;
+    text-decoration: none;
+    color: #000;
+}
+
+#forms .form-content .form .advice{
+    font-style: italic;
+    margin-bottom: 30px;
+}
+
+#forms .form-content .form .camp-container{
+    display: inline-block;
+    width: var(--aside-size);
+}
+
+#forms .form-content .form .notifications{
+    padding: 10px;
+    padding-top: 0px;
+}
+
+#forms .form-content .form .notifications .notification{
+    width: 80%;
+    padding: 5px;
+    color:#fff;
+    border-radius: var(--window-radius);
+    cursor: default;
+    animation: appear 0.2s linear;
+}
+
+#forms .form-content .form .notifications .notification.remove{
+    animation: minimize 0.2s linear;
+}
+
+#forms .form-content .form .notifications .notification.error{
+    background: var(--form-notification-error-color);
+}
+
+#forms .form-content .form .notifications .notification.ok{
+    background: var(--form-notification-ok-color);
+}
+
+#forms .form-content .form .notifications .notification.response{
+    background: var(--form-notification-advice-color);
+}
+
+#forms .form-content .form .notifications .notification p{
+    text-align: left;
+    width: 100%;
+    padding: 0 8px;
+}
+
+#forms .form-content .form .notifications .notification p span{
+    display: block;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+#forms .form-content .form .camps{
+    width: 100%;
+    max-width: var(--aside-size);
+    display: inline-block;
+}
+
+#forms .form-content .form .camps .camp {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+#forms .form-content .form .camps .camp input{
+    width: 100%;
+    background:#f0f0f0;
+    border: 0px;
+    border-bottom: 2px solid #ccc;
+    border-radius: var(--window-radius);
+    outline: 0px;
+    font-size: 18px;
+    padding: var(--form-input-padding);
+    padding-top: calc(var(--form-input-padding) + 7px);
+    padding-bottom: calc(var(--form-input-padding) - 7px);
+    padding-left: calc(var(--form-input-padding) * 2.8);
+}
+
+#forms .form-content .form .camps .camp.correct input{
+    border-bottom: 2px solid var(--input-correct-border);
+}
+
+#forms .form-content .form .camps .camp span[class^="icon"]{
+    display: inline-block;
+    margin-right: 18px;
+}
+
+#forms .form-content .form .camps .camp label{
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: var(--form-input-padding);
+    font-size: 18px;
+    color: rgba(0,0,0,0.6);
+    cursor: text;
+    transition: 0.2s;
+    text-align: left;
+}
+
+#forms .form-content .form .camps .camp label .text{
+    width: 100%;
+    transition: 0.2s;
+    display: inline-block;
+    position: absolute;
+}
+
+#forms .form-content .form .camps .camp input:focus + label .text{
+    margin-top: -10px;
+    font-size: 12px; 
+}
+#forms .form-content .form .camps .camp input:valid + label .text{
+    margin-top: -10px;
+    font-size: 12px; 
+}
+
+#forms .form-content .form .camps .camp.last {
+    margin-bottom: 20px;
+}
+
+#forms .form-content .form .camps a.forgot-password{
+    width: 100%;
+    cursor: pointer;
+    font-size: 18px;
+    margin: 20px 0;
+    text-decoration: none;
+}
+
+#forms .form-content .form .camps a.forgot-password:hover{
+    text-decoration: underline;
+}
+
+#forms .form-content .form .camps button{
+    background: var(--purple);
+    margin-top: 30px;
+}
+
+#forms aside.left + .form-content{
+    left: var(--aside-size);
+}
+
+#forms aside.right + .form-content{
+    left: 0px;
+}
+
+#forms aside.right .background{
+    background-position: 20%;
+    animation: bgMoveRight 1s;
+}
+
+#forms aside.left .background{
+    background-position: 0%;
+    animation: bgMoveLeft 1s;
+}

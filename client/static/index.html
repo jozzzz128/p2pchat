@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Ark | Mensajeria p2p</title>
     <link rel="stylesheet" href="/static/css/animations.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/loader.css">
+    <link rel="stylesheet" href="/static/css/forms.css">
+    <link rel="stylesheet" href="/static/fonts/style.css">
     <script src="/static/js/socket.io.min.js"></script>
     <script src="/static/js/io-code.js"></script>
+    <script src="/static/js/util.js"></script>
     <script src="/static/js/main.js"></script>
 </head>
 <body>
-    <div id="container">
-        <h2>Hello world</h2>
-        <p>Active users on webclient: <span id="count">1</span></p>
-        <button id="login">Try to login</button>
+    <div id="loader" class="flex-centered">
+        <div class="loader lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
     </div>
+    <div id="container"></div>
 </body>
 </html>

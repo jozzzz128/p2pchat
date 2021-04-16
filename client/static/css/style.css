@@ -1,16 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&family=Raleway:wght@200;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&family=Raleway:wght@200;400&display=swap');
 
 *{
     margin: 0;
     padding: 0;
     font-family: 'Raleway';
     box-sizing: border-box;
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 
 :root{
     /*Colors*/
     --purple: #616BEE;
     --grey: #4c4e4e;
+    --red: #ff5353;
+    --green: #2FD484;
+    --blue: #6488D9;
+    
     /*Values*/
     --window-radius: 4px;
     --window-shadow: 2px 2px 2px #000;
@@ -23,12 +35,28 @@
     --prompt-text-size: 18px;
     /*Loader*/
     --loader-color: #333;
-    --
+    /*Forms*/
+    /*--Aside*/
+    --aside-wallpaper: url(../img/space.jpg);
+    --aside-size: 500px;
+    --aside-text-transition: 0.5s;
+    --aside-animation-transition: 1s;
+    --aside-text-animation-movement: 20%;
+    /*--Camps*/
+    --form-notification-error-color: var(--red);
+    --form-notification-ok-color: var(--green);
+    --form-notification-advice-color: var(--blue);
+    --input-correct-border: var(--green);
+    --input-invalid-border: transparent;
+}
+
+body{
+    overflow: hidden;
 }
 
 /*Global classes*/
 .flex-centered{
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
 }
@@ -37,10 +65,27 @@
     animation: getBlur 0.2s linear;
 }
 
+/*Loader*/
+#loader{
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background: #fff;
+    z-index: 3;
+    opacity: 1;
+}
+#loader.bannish{
+    opacity: 0;
+    animation: getTransparent 0.5s linear;
+}
+
 /*Container*/
 #container{
-    width: 100%;
-    min-height: 100vh;
+    width: calc(100% + 10px);
+    min-height: calc(100vh + 10px);
+    margin: -5px;
 }
 
 /*Prompt window*/
@@ -53,6 +98,7 @@
     background: var(--window-background);
     animation: appearTransparent 0.2s linear;
     opacity: 1;
+    z-index: 5;
 }
 
 .prompt-background .prompt-window{
