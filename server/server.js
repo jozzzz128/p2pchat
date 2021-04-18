@@ -23,15 +23,48 @@ io.on("connection", socket => {
             if(token){
                 socket.emit("res", {
                     code: 200,
-                    data: token.token
+                    token: token.token,
+                    message: `Inicio de sesión exitoso!!, Bienvenid@ ${username}.`
                 });
                 io.emit("active", token.active);
             }
             //If log in failed
-            else socket.emit("res", {
-                code: 500,
-                message: `wrong user data or user doesn't exists`
+            else {
+                socket.emit("res", {
+                    code: 500,
+                    message: `El usuario no existe, las credenciales de acceso son incorrectas, o este usuario ya se encuentra activo.`
+                });
+                socket.disconnect();
+            }
+        });
+
+        //Register from socket
+        socket.on('register', data => {
+            const {username, password, addr} = data;
+            //Try to generate token
+            const token = db.registerUser({
+                username: username,
+                password: password,
+                addr: addr,
+                id: socket.id
             });
+            //If log in success
+            if(token){
+                socket.emit("res", {
+                    code: 200,
+                    token: token.token,
+                    message: `Registro exitoso!!, Bienvenid@ ${username}.`
+                });
+                io.emit("active", token.active);
+            }
+            //If log in failed
+            else{
+                socket.emit("res", {
+                    code: 500,
+                    message: `El usuario ya se encuentra registrado`
+                });
+                socket.disconnect();
+            }
         });
 
         //Disconnect from server && broacast disconnection
@@ -39,9 +72,6 @@ io.on("connection", socket => {
             console.log(`Disconnected from server, id: ${socket.id}`);
             io.emit("active", db.removeActiveUser(socket.id));
         });
-
-        
-
 
     } catch (e) {
         console.log(e);

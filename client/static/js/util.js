@@ -83,11 +83,6 @@ const animations = {
                         text: message
                     });
 
-                    //Update active clients data
-                    socket.on("active", activeUsers => {
-                        console.log(activeUsers.filter(active => active.username != data.username));
-                    });
-
                     finish = false;
                 });
                 
@@ -103,15 +98,51 @@ const animations = {
         util.validate.form(registerForm, {
             flag: flags.registerButtonEnabled,
             buttonCallback: async data => {
-                console.log(data);
+                var finish = true;
+                //Send login data through socket
+                socket.emit("register", data);
+                //Show server response with error or token
+                socket.on("res", config => {
+                    const {code, token, message} = config;
+                    //If everything is ok
+                    if(code == 200){
+                        sessionStorage.token = token;
+                        gen.formNotification({
+                            append: container.querySelector("#register-f .camp-container .notifications"),
+                            type: "ok",
+                            text: message
+                        });
+                    }
+                    else if(code == 500) gen.formNotification({
+                        append: container.querySelector("#register-f .camp-container .notifications"),
+                        type: "error",
+                        text: message
+                    });
 
-                gen.formNotification({
-                    append: container.querySelector("#register-f .camp-container .notifications"),
-                    type: "error",
-                    text: "el registro salio bien"
+                    finish = false;
                 });
+                
+                await awaitResponse();
+                async function awaitResponse(){
+                    await util.asyncSetTimeOut(()=>{
+                        if(finish) awaitResponse();
+                    },500);
+                }
             }
         });
+    },
+    animateChat: forms => {
+        //Selectors
+        const aside = forms.querySelector("aside");
+        const chat = forms.querySelector(".chat");
+        const activeUsers = chat.querySelector(".active-users");
+
+        //Add CSS to head to control chat display => .chat .on-username
+        gen.userChat.contactAnimation([
+            'elwikilixfounder'
+        ]);
+
+        const conversation = chat.querySelector(".conversation");
     }
 };
 
@@ -133,6 +164,9 @@ const util = {
             callback();
             resolve();
         }, time)); 
+    },
+    delay: async time => {
+        await util.asyncSetTimeOut(() => {}, time);
     },
     validate: {
         username: username => {

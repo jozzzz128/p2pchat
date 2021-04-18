@@ -16,13 +16,13 @@ const consults = {
         //Return Token && Active user list
         return {
             token: token,
-            active: consults.getActiveUsers(token, addr, id)
+            active: consults.getActiveUsers(username, addr, id)
         };
     },
     loginUser: data => {
         const {username, password, addr, id} = data;
         //If user doesn't exists
-        if(!consults.userExists({username: username, password: password})) return false;
+        if(!consults.userExists({username: username, password: password}) || consults.getActiveUsers(username)) return false;
         //Generate token
         const token = jwt.sign({ username: username }, process.env.TOKEN_KEY);
         //Return Token && Active user list
@@ -59,10 +59,11 @@ const consults = {
                 id: id
             });
             console.log(activeUsers);
+            //Pop users id
             return activeUsers.map(user => {
                 return {
                     username: user.username,
-                    addr: addr
+                    addr: user.addr
                 }
             });
         }

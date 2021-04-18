@@ -18,7 +18,7 @@ const server = require("socket.io-client");
 /*--SOCKET.IO--*/
 //Socket.IO Code 
 io.on("connection", socket => {
-    var connection = false;
+    const connection = code.connectToHostServer.connect(io, socket);
     //Detect if connection is from web client or another client
     code.manageConnections(io, socket);
     //Detect if user disconnects
@@ -30,14 +30,38 @@ io.on("connection", socket => {
             //Get user data
             const {username, password} = data;
             //Start connection with server (sending login data)
-            connection = code.connectToHostServer(io, socket, {
+            code.connectToHostServer.action(connection, {
+                route: 'login',
                 username: username,
                 password: password,
                 addr: `${ip.address()}:${ports.client}`
             });
         } 
         //In case all gets fucked
-        catch(e){ 
+        catch(e) { 
+            console.log(e); 
+            socket.emit("res",{
+                code: 500,
+                message: 'Something went wrong on the client'
+            });
+        }
+    });
+
+    //Receive login data
+    socket.on("register", data => {
+        try {
+            //Get user data
+            const {username, password} = data;
+            //Start connection with server (sending login data)
+            code.connectToHostServer.action(connection, {
+                route: 'register',
+                username: username,
+                password: password,
+                addr: `${ip.address()}:${ports.client}`
+            });
+        } 
+        //In case all gets fucked
+        catch(e) {
             console.log(e); 
             socket.emit("res",{
                 code: 500,
@@ -73,28 +97,38 @@ const code = {
         else console.log(`Client Disconnected: ${socket.id}`);
     },
     //Connection to server && functionality
-    connectToHostServer: (io, socket, data) => {
-        //Get user data
-        const {username, password, addr} = data;
-        //Start connection with server
-        const connection = server(process.env.SERVER, { reconnectionDelayMax: 10000 });
-        //Try to login on server
-        connection.emit('login', {
-            username: username,
-            password: password,
-            addr: addr
-        });
-        //Get response from server
-        connection.on("res", token => {
-            //Return response to web UI
-            socket.emit("res", token);
-        });
-        //Get active clients update from server
-        connection.on("active", active => {
-            if(active) io.emit("active", active);
-        });
-        //When web client disconnects
-        return connection;
+    connectToHostServer: {
+        connect: (io, socket) => {
+            //Start connection with server
+            const connection = server(process.env.SERVER, { reconnectionDelayMax: 10000 });
+            //Get response from server
+            connection.on("res", response => {
+                //Return response to web UI
+                socket.emit("res", response);
+            });
+            //Get active clients update from server
+            connection.on("active", active => {
+                if(active) io.emit("active", active);
+            });
+            connection.on("connect_error", err => {
+                socket.emit("server_connection_error", true);
+            });
+            connection.on('connect', () => {
+                socket.emit("server_connection_error", false);
+            });
+            //When web client disconnects
+            return connection;
+        },
+        action: (connection, data) => {
+            //Get user data
+            const {username, password, addr, route} = data;
+            //Try to login on server
+            connection.emit(route, {
+                username: username,
+                password: password,
+                addr: addr
+            });
+        }
     }
 }
 

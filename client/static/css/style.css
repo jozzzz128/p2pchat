@@ -42,6 +42,17 @@
     --aside-text-transition: 0.5s;
     --aside-animation-transition: 1s;
     --aside-text-animation-movement: 20%;
+    /*--User Profile--*/
+    --aside-message-size: 300px;
+    --aside-message-thumb-color: var(--purple);
+    --aside-message-buttons: var(--purple);
+    /*Chat*/
+    --friend-message-color: #fff;
+    --client-message-color: var(--purple);
+    --client-thumb-image: url(../img/carlos.png);
+    --chat-background-color: #fff;
+    --chat-background-image: url(https://i.pinimg.com/originals/45/ce/c7/45cec757faf8d07318cc829dcf21c697.jpg);
+    --chat-background-opacity: 0.3;
     /*--Camps*/
     --form-notification-error-color: var(--red);
     --form-notification-ok-color: var(--green);
@@ -152,4 +163,63 @@ body{
 .prompt-background.close .prompt-window{
     opacity: 0;
     animation: minimize 0.3s linear;
+}
+
+/*--sidebar--*/
+aside{
+    width: var(--aside-size);
+    height: 100%;
+    position: absolute;
+    overflow: hidden;
+    top: 0px;
+    left: 0px;
+    text-align: center;
+    background: var(--purple);
+    z-index: 2;
+}
+aside.left{
+    left: 0px;
+    animation: moveToLeft var(--aside-animation-transition);
+}
+aside.right{
+    left: calc(100% - var(--aside-size));
+    animation: moveToRight var(--aside-animation-transition);
+}
+
+aside *{
+    z-index: 2;
+}
+aside .background{
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background: var(--aside-wallpaper);
+    background-size: auto 100%;
+    background-attachment: fixed;
+    opacity: 0.5;
+    z-index: 1;
+}
+
+aside .content{
+    width: 100%;
+}
+
+aside .content .info{
+    width: var(--aside-size);
+    display: none;
+    padding: 40px;
+    color: #fff;
+    transform: translateX(0px);
+}
+aside .content .info h2{
+    font-family: 'Open Sans';
+    font-weight: bolder;
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+aside .content .info p{
+    font-size: 18px;
+    line-height: 1.8;
 }

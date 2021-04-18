@@ -1,21 +1,86 @@
 const code = {
+    socketEventLoad: () => {
+        //When client cannot connect to server
+        socket.on('server_connection_error', flag => {
+            if(serverConnectionError && flag){
+                gen.loadBlockPop({
+                    title: 'Se ha perdido la conexión con el servidor',
+                    text: [
+                        'Intentando reconectar con el servidor...',
+                        'Verifica tu conexión a internet.'
+                    ]
+                });
+                serverConnectionError = false;
+            }
+            else if(!flag){
+                kill.popWindow();
+                serverConnectionError = true;
+            }
+        });
+        //When connection to client is lost
+        socket.on('disconnect', () => {
+            gen.loadBlockPop({
+                title: 'Se ha perdido la conexión con el cliente',
+                text: [
+                    'Intentando reconectar con el cliente...',
+                    'Verifica tu conexión a internet.'
+                ]
+            });
+        });
+        //When active clients array updates
+        socket.on("active", activeUsers => {
+            //console.log(activeUsers.filter(active => active.username != data.username));
+            console.log(activeUsers);
+        });
+    },
     newWebClientConnection: usercount => {
-        console.log(`user count: ${usercount}`);
         if(usercount != 1){
             const prevMessage = document.querySelector(".prompt-background");
-            console.log(prevMessage);
             if(prevMessage) prevMessage.remove();
-            body.append(gen.exceededConnections());
+            gen.loadBlockPop({
+                title: 'Se ha detectado otra sesión abierta',
+                text: [
+                    'Unicamente se puede tener una sesión abierta por usuario.',
+                    'Manten una sola sesión abierta para continuar...'
+                ]
+            });
         }
         else kill.popWindow();
+    },
+    detectActiveSession: async socket => {
+        const token = sessionStorage.token;
+        const flags = {
+            loop: true,
+            answer: false
+        };
+
+        //Send login token through socket
+        if(token){
+            socket.emit("login", token);
+            socket.on("res", data => {              
+                if(data.code == 200) flags.answer = data.username;
+                flags.loop = false;
+            });
+        }
+        else flags.loop = false;
+        
+        //Wait for response
+        await awaitResponse();
+        async function awaitResponse(){
+            await util.asyncSetTimeOut(()=>{
+                if(flags.loop) awaitResponse();
+                return flags.answer;
+            },300);
+        }
     }
 };
 
 const gen = {
-    exceededConnections: () => {
+    loadBlockPop: async config => {
+        const {title, text} = config;
+        var lines = ''; text.forEach(line => { lines += `<p>${line}</p>`; });
         //Blur page content
-        container.classList.add("blur");
-
+        if(!container.classList.contains("blur")) container.classList.add("blur");
         const exceeded = document.createElement("div");
         exceeded.classList.add("prompt-background");
         exceeded.classList.add("flex-centered");
@@ -25,17 +90,17 @@ const gen = {
                 <div class="content flex-centered">
                     ${gen.loadingAnimation()}
                     <div class="info">
-                        <h2>Se ha detectado otra sesión abierta</h2>
-                        <p>Unicamente se puede tener una sesión abierta por usuario.</p>
-                        <p>Manten una sola sesión abierta para continuar...</p>
+                        <h2>${title}</h2>
+                        ${lines}
                     </div>
                 </div>
             </div>
         `;
-        setTimeout(()=>{
+        if(body.querySelector(".prompt-background")) await kill.popWindow(false);
+        setTimeout(() => {
             exceeded.classList.add("open");
-        },400);
-        return exceeded;
+        },300);
+        body.append(exceeded);
     },
     loadingAnimation: () => {
         return `
@@ -96,7 +161,7 @@ const gen = {
                     </div>
                 </div>
                 <div id="register-f" class="form right">
-                    <h2>Registrate</h2>
+                    <h2>Registrate en Ark!</h2>
                     <ul class="buttons">
                         <a href="#" target="_blank" class="icon-github"></a>
                     </ul>
@@ -138,6 +203,226 @@ const gen = {
         animations.animateForm(forms);
         container.append(forms);
     },
+    userChat: {
+        init: () => {
+            const forms = document.createElement("div");
+            forms.id = "forms";
+            forms.classList.add("message-view");
+            forms.innerHTML = `
+            <aside class="flex-centered">
+                <div class="background"></div>
+                <div class="content">
+                    <div class="profile left on">
+                        <div class="top">
+                            <div class="thumb"></div>
+                            <p>@elcarlosballarta</p>
+                        </div>
+                        <div class="bottom">
+                            <button>
+                                <span class="on">Cerrar Sesión</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <div class="chat flex-centered">
+                <div class="active-users">
+                    <!--<div class="search">
+                        <label for="search-bar" class="icon-search"></label>
+                        <input id="search-bar" type="text" placeholder="Buscar usuarios...">
+                    </div>-->
+                    <ul>
+                    ${gen.userChat.contact({
+                        username: 'elwikilixfounder'
+                    })}
+                    </ul>
+                </div>
+                <div class="conversation">
+                    <div class="background"></div>
+                    ${gen.userChat.conversation({
+                        username: 'elwikilixfounder',
+                        messageList: [
+                            {
+                                date: '10:34pm',
+                                remitent: true,
+                                text: 'This is the message text'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text of me'    
+                            },
+                            {
+                                date: '10:34pm',
+                                remitent: true,
+                                text: 'This is the message text'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text of me'    
+                            },
+                            {
+                                date: '10:34pm',
+                                remitent: true,
+                                text: 'This is the message text'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text of me'    
+                            },
+                            {
+                                date: '10:34pm',
+                                remitent: true,
+                                text: 'This is the message text'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text of me'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text of me'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text of me'    
+                            },
+                            {
+                                date: '10:34pm',
+                                remitent: true,
+                                text: 'This is the message text'    
+                            },
+                            {
+                                date: '10:34pm',
+                                text: 'This is the message text of me'    
+                            }
+                        ]
+                    })}
+                </div>
+            </div>
+            `;
+            //Load functionality form animations
+            animations.animateChat(forms);
+            container.append(forms);
+        },
+        contactAnimation: usernames => {
+            const prev = document.querySelector("#contact-animation");
+            const style = document.createElement("style");
+            style.id = "contact-animation";
+            var content = ``;
+            usernames.forEach(username => {
+                const selector = `#forms.message-view .chat.on-${username}`;
+                const contact = `${selector} .active-users ul li.contact-${username}`;
+                content += `
+                    /*--Contact-@${username}--*/
+                    ${contact}{
+                        background: var(--aside-message-thumb-color);
+                        cursor: default;
+                    }
+                    
+                    ${contact} .info{
+                        color: #fff;
+                    }
+                    
+                    ${contact} .info .last-message{
+                        color: #f2f2f2;
+                    }
+                    
+                    ${contact} .time{
+                        color: #f2f2f2;
+                    }
+                    /*--Chat-@${username}--*/
+                    ${selector} .conversation #chat-${username}{
+                        display:block;
+                    }
+                `;
+            });
+            style.innerHTML += content;
+            if(prev) prev.remove();
+            document.querySelector("head").append(style);
+        },
+        conversation: config => {
+            const {username, messageList} = config;
+            var messages = '';
+            messageList.forEach(message => {
+                const {date, text, remitent} = message;
+                messages += gen.userChat.message({
+                    date: date,
+                    text: text,
+                    remitent: remitent
+                });
+            });
+            var content = `
+            <div class="chat-content" id="chat-${username}">
+                <h2 class="title">
+                    @${username}
+                </h2>
+                <div class="message-container">${messages}</div>
+                <div class="controls flex-centered">
+                    <input type="text" placeholder="Escribe un mensaje...">
+                    <span class="icon-paperclip"></span>
+                </div>
+            </div>
+            `;
+            return content;
+        },
+        contact: config => {
+            const {username} = config;
+            const content = `
+            <li class="flex-centered contact-${username}">
+                <div class="thumb">
+                    <span class="messages flex-centered">
+                        3
+                    </span>
+                </div>
+                <p class="info">
+                    @${username}
+                    <span class="last-message">Help me open the door.</span>
+                </p>
+                <span class="time">3h</span>
+            </li>
+            `;
+            return content;
+        },
+        message: config => {
+            const {date, text, remitent} = config;
+            let message = ``;
+            if(remitent) {
+                message += `
+                <div class="message left flex-centered">
+                    <div class="thumb flex-centered">
+                        <span class="date">${date}</span>
+                    </div>
+                    <div class="message-content">
+                        <span class="triangle"></span>
+                        <p>${text}</p>
+                    </div>
+                </div>
+                `;
+            }
+            else {
+                message += `
+                <div class="message right flex-centered">
+                    <div class="message-content">
+                        <span class="triangle"></span>
+                        <p>${text}</p>
+                    </div>
+                    <div class="thumb flex-centered">
+                        <span class="date">${date}</span>
+                    </div>
+                </div>
+                `;
+            }
+            return message;
+        }
+    },
     formNotification: (config = {type : "", text : ""}) => {
         const {type, text, append} = config;
         const notification = document.createElement("div");
@@ -154,13 +439,17 @@ const gen = {
 };
 
 const kill = {
-    popWindow: () => {
-        const pop = document.querySelector(".prompt-background");
-        pop.classList.add("close");
-        setTimeout(()=>{
-            container.classList.remove("blur");
-            pop.remove();
-        },300);
+    popWindow: async (focus = true) => {
+        const pop = body.querySelector(".prompt-background");
+        if(pop){
+            pop.classList.add("close");
+            await util.asyncSetTimeOut(() => {
+                if(focus) container.classList.remove("blur");
+                pop.remove();
+            },300);
+            return true;
+        }
+        return false;
     },
     removeLoader: () => {
         const loader = document.querySelector("#loader");
