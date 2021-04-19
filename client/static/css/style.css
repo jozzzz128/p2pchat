@@ -223,3 +223,21 @@ aside .content .info p{
     font-size: 18px;
     line-height: 1.8;
 }
+
+aside.left + .form-content{
+    left: var(--aside-size);
+}
+
+aside.right + .form-content{
+    left: 0px;
+}
+
+aside.right .background{
+    background-position: 20%;
+    animation: bgMoveRight 1s;
+}
+
+aside.left .background{
+    background-position: 0%;
+    animation: bgMoveLeft 1s;
+}

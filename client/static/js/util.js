@@ -1,6 +1,7 @@
 const flags = {
     loginButtonEnabled: false,
-    registerButtonEnabled: false
+    registerButtonEnabled: false,
+    permanentDisableFormButton: false,
 };
 
 const animations = {
@@ -61,8 +62,9 @@ const animations = {
         //Login form
         util.validate.form(loginForm, {
             flag: flags.loginButtonEnabled,
-            buttonCallback: async data => {
+            buttonCallback: async (data) => {
                 var finish = true;
+                var disableButton = false;
                 //Send login data through socket
                 socket.emit("login", data);
                 //Show server response with error or token
@@ -70,7 +72,11 @@ const animations = {
                     const {code, token, message} = config;
                     //If everything is ok
                     if(code == 200){
+                        //Disable button
+                        disableButton = true;
+                        //Save session token
                         sessionStorage.token = token;
+                        //Display Notification to user
                         gen.formNotification({
                             append: container.querySelector("#login-f .camp-container .notifications"),
                             type: "ok",
@@ -92,6 +98,12 @@ const animations = {
                         if(finish) awaitResponse();
                     },500);
                 }
+
+                //If response was correct return info for generating chat
+                if(disableButton) return {
+                    username: data.username,
+                    activeClients: code.activeList
+                };
             }
         });
         //Register form
@@ -99,6 +111,7 @@ const animations = {
             flag: flags.registerButtonEnabled,
             buttonCallback: async data => {
                 var finish = true;
+                var disableButton = false;
                 //Send login data through socket
                 socket.emit("register", data);
                 //Show server response with error or token
@@ -106,7 +119,11 @@ const animations = {
                     const {code, token, message} = config;
                     //If everything is ok
                     if(code == 200){
+                        //Disable button
+                        disableButton = true;
+                        //Save token
                         sessionStorage.token = token;
+                        //Show notification
                         gen.formNotification({
                             append: container.querySelector("#register-f .camp-container .notifications"),
                             type: "ok",
@@ -128,21 +145,37 @@ const animations = {
                         if(finish) awaitResponse();
                     },500);
                 }
+
+                //If response was correct return info for generating chat
+                if(disableButton) return {
+                    username: data.username,
+                    activeClients: code.activeList
+                };
             }
         });
     },
-    animateChat: forms => {
+    animateChat: (forms, userList) => {
         //Selectors
-        const aside = forms.querySelector("aside");
+        //const aside = forms.querySelector("aside");
         const chat = forms.querySelector(".chat");
-        const activeUsers = chat.querySelector(".active-users");
+        const activeUsers = chat.querySelector(".active-users ul");
+        const conversation = chat.querySelector(".conversation");
 
         //Add CSS to head to control chat display => .chat .on-username
-        gen.userChat.contactAnimation([
-            'elwikilixfounder'
-        ]);
-
-        const conversation = chat.querySelector(".conversation");
+        gen.userChat.contactAnimation(userList);
+        //Add contacts to contact list
+        gen.userChat.contactList({
+            append: activeUsers,
+            chat: chat,
+            userList: userList
+        });
+        //Add message chat to all contacts on contact list
+        gen.userChat.conversationList({
+            append: conversation,
+            userList: userList
+        });
+        //Add socket functionality to all contacts on contact list
+        code.contactListSocket(userList);
     }
 };
 
@@ -155,6 +188,49 @@ const util = {
             setTimeout(()=>{ selector.addEventListener("click", toggle); },config.time);
         }
     },
+    enterPressed: (selector, callback) => {
+        selector.addEventListener("keyup", e => {
+            // Number 13 is the "Enter" key on the keyboard
+            if (e.keyCode === 13) {
+                // Cancel the default action, if needed
+                e.preventDefault();
+                // Trigger the button element with a click
+                callback();
+            }
+        });
+    },
+    multipleKeysPressed: config => {
+        const {selector, keys, callback} = config;
+        const capKeys = keys.map(key => util.capitalice(key));
+        let keysPressed = {};
+
+        selector.addEventListener('keydown', (event) => {
+            keysPressed[event.key] = true;
+            if(allPressed() && event.key == capKeys[capKeys.length-1]) callback();
+        });
+            
+        selector.addEventListener('keyup', (event) => {
+            delete keysPressed[event.key];
+        });
+
+        function allPressed(){
+            let flag = true;
+            for (let i = 0; i < capKeys.length-1; i++) {
+                const key = capKeys[i];
+                if(!keysPressed[key]){
+                    flag = false;
+                    break;
+                }
+            }
+            return flag;
+        }
+    },
+    capitalice: text => {
+        return text.replace(/^\w/, (c) => c.toUpperCase()); 
+    },
+    scrollToBottom: elem => {
+        elem.scrollTop = elem.scrollHeight;
+    },
     extractInputValue: element => {
         if(typeof(element) == "string") return element;
         return element.value;
@@ -164,6 +240,19 @@ const util = {
             callback();
             resolve();
         }, time)); 
+    },
+    imageToBase64: (url, callback) => {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+              var reader = new FileReader();
+              reader.onloadend = function() {
+                callback(reader.result);
+              }
+              reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
     },
     delay: async time => {
         await util.asyncSetTimeOut(() => {}, time);
@@ -194,6 +283,10 @@ const util = {
            const passwordConfirmationInput = util.extractInputValue(input);
            if(passwordInput == passwordConfirmationInput) return true;
            return false;
+        },
+        empty: text => {
+            if(text.length == 0) return true;
+            return false;
         },
         multiple: camps => {
             var flag = true;
@@ -240,13 +333,22 @@ const util = {
 
             //Form button event
             util.toggleClick(formButton, () => {
-                if(flag){
+                if(!flags.permanentDisableFormButton && flag){
                     formButton.classList.add("disabled");
                     formButton.classList.add("loading");
-                    setTimeout(async ()=>{
-                        await buttonCallback(validCamps);
-                        formButton.classList.remove("disabled");
-                        formButton.classList.remove("loading");
+                    setTimeout(async () => {
+                        const reEnableButton = await buttonCallback(validCamps);
+                        if(reEnableButton === undefined){
+                            console.log("undefined button");
+                            formButton.classList.remove("disabled");
+                            formButton.classList.remove("loading");
+                        }
+                        else {
+                            flags.permanentDisableFormButton = true;
+                            //formButton.classList.remove("loading");
+                            kill.loginAndRegisterForms();
+                            gen.userChat.init(reEnableButton);
+                        }
                     },1000);
                 }
             });

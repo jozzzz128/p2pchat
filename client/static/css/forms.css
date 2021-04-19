@@ -82,7 +82,6 @@
     height: 100vh;
     position: absolute;
     top: 0px;
-    left: var(--aside-size);
     transition: 1s;
 }
 
@@ -247,22 +246,4 @@
 #forms .form-content .form .camps button{
     background: var(--purple);
     margin-top: 30px;
-}
-
-aside.left + .form-content{
-    left: var(--aside-size);
-}
-
-aside.right + .form-content{
-    left: 0px;
-}
-
-aside.right .background{
-    background-position: 20%;
-    animation: bgMoveRight 1s;
-}
-
-aside.left .background{
-    background-position: 0%;
-    animation: bgMoveLeft 1s;
 }

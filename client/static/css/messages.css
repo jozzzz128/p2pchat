@@ -266,6 +266,18 @@
     border: 10px solid transparent;
 }
 
+#forms.message-view .chat .conversation .chat-content .message-container .message .message-content.image{
+    padding: 5px;
+    padding-bottom: 0;
+}
+
+#forms.message-view .chat .conversation .chat-content .message-container .message .message-content.image img{
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    border-radius: var(--window-radius);
+}
+
 #forms.message-view .chat .conversation .chat-content .message-container .message.left{
     justify-content: flex-start;
 }
@@ -307,8 +319,13 @@
     padding-left: 25px;
 }
 
-#forms.message-view .chat .conversation .chat-content .controls .icon-paperclip{
+#forms.message-view .chat .conversation .chat-content .controls .attach .icon-paperclip{
     font-size: 30px;
     margin-left: 20px;
     color: #333;
+    cursor: pointer;
+}
+
+#forms.message-view .chat .conversation .chat-content .controls .attach input[type="file"]{
+    display: none;
 }

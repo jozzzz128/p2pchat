@@ -1,5 +1,6 @@
 const code = {
-    socketEventLoad: () => {
+    activeList: [],
+    socketEventLoad: (socket) => {
         //When client cannot connect to server
         socket.on('server_connection_error', flag => {
             if(serverConnectionError && flag){
@@ -29,8 +30,18 @@ const code = {
         });
         //When active clients array updates
         socket.on("active", activeUsers => {
-            //console.log(activeUsers.filter(active => active.username != data.username));
-            console.log(activeUsers);
+            //If chat is open && working
+            const chat = container.querySelector("#forms.message-view");
+            if(chat){
+                console.log("refrescando chat");
+                const difference = code.getActiveDifference({
+                    prev: code.activeList,
+                    recent: activeUsers
+                });
+                animations.animateChat(chat, difference.map(user => user.username));
+            }
+            code.activeList = activeUsers;
+            
         });
     },
     newWebClientConnection: usercount => {
@@ -72,6 +83,57 @@ const code = {
                 return flags.answer;
             },300);
         }
+    },
+    getActiveDifference: config => {
+        const {prev, recent} = config;
+        
+        //var onlyInPrev = prev.filter(comparer(recent));
+        var onlyInRecent = recent.filter(comparer(prev));
+        
+        //return onlyInPrev.concat(onlyInB);
+        return onlyInRecent;
+
+        function comparer(otherArray){
+            return function(current){
+                return otherArray.filter(function(other){
+                    return other.username == current.username && other.addr == current.addr
+                }).length == 0;
+            }
+        }
+    },
+    contactListSocket: userList => {
+        userList.forEach(username => {
+
+            //When message is received from user
+            socket.on(`message_from_${username}`, data => {
+                const {date, text, image} = data;
+                const append = document.querySelector(`#chat-${username} .message-container`);
+                if(image){
+                    append.append(gen.userChat.message({
+                        date: date,
+                        image: image,
+                        remitent: true
+                    }));
+                }
+                else{
+                    append.append(gen.userChat.message({
+                        date: date,
+                        text: text,
+                        remitent: true
+                    }));
+                }
+                //Scroll chat to bottom
+                util.scrollToBottom(append);
+            });
+            //When error is receibed from user
+            socket.on(`${username}_connection_error`, flag => {
+                if(flag){ 
+                    console.log(`user ${username} disconnected`); 
+                }
+                else console.log(`user ${username} connected`); 
+            });
+
+        });
     }
 };
 
@@ -111,7 +173,7 @@ const gen = {
         const forms = document.createElement("div");
         forms.id = "forms";
         forms.innerHTML = `
-            <aside class="flex-centered">
+            <aside class="flex-centered left">
                 <div class="background"></div>
                 <div class="content">
                     <div class="login info left on">
@@ -132,7 +194,7 @@ const gen = {
                 <div id="login-f" class="form left on">
                     <h2>Inicia Sesión en Ark</h2>
                     <ul class="buttons">
-                        <a href="#" target="_blank" class="icon-github"></a>
+                        <a href="https://github.com/jozzzz128/p2pchat" target="_blank" class="icon-github"></a>
                     </ul>
                     <p class="advice">o visita el repositorio de este proyecto</p>
                     <div class="camp-container">
@@ -163,7 +225,7 @@ const gen = {
                 <div id="register-f" class="form right">
                     <h2>Registrate en Ark!</h2>
                     <ul class="buttons">
-                        <a href="#" target="_blank" class="icon-github"></a>
+                        <a href="https://github.com/jozzzz128/p2pchat" target="_blank" class="icon-github"></a>
                     </ul>
                     <p class="advice">o visita el repositorio de este proyecto</p>
                     <div class="camp-container">
@@ -204,18 +266,19 @@ const gen = {
         container.append(forms);
     },
     userChat: {
-        init: () => {
+        init: config => {
+            const {username, activeClients} = config;
             const forms = document.createElement("div");
             forms.id = "forms";
             forms.classList.add("message-view");
             forms.innerHTML = `
-            <aside class="flex-centered">
+            <aside class="flex-centered left">
                 <div class="background"></div>
                 <div class="content">
-                    <div class="profile left on">
+                    <div class="profile on">
                         <div class="top">
                             <div class="thumb"></div>
-                            <p>@elcarlosballarta</p>
+                            <p>@${username}</p>
                         </div>
                         <div class="bottom">
                             <button>
@@ -231,85 +294,15 @@ const gen = {
                         <label for="search-bar" class="icon-search"></label>
                         <input id="search-bar" type="text" placeholder="Buscar usuarios...">
                     </div>-->
-                    <ul>
-                    ${gen.userChat.contact({
-                        username: 'elwikilixfounder'
-                    })}
-                    </ul>
+                    <ul></ul>
                 </div>
                 <div class="conversation">
                     <div class="background"></div>
-                    ${gen.userChat.conversation({
-                        username: 'elwikilixfounder',
-                        messageList: [
-                            {
-                                date: '10:34pm',
-                                remitent: true,
-                                text: 'This is the message text'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text of me'    
-                            },
-                            {
-                                date: '10:34pm',
-                                remitent: true,
-                                text: 'This is the message text'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text of me'    
-                            },
-                            {
-                                date: '10:34pm',
-                                remitent: true,
-                                text: 'This is the message text'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text of me'    
-                            },
-                            {
-                                date: '10:34pm',
-                                remitent: true,
-                                text: 'This is the message text'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text of me'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text of me'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text of me'    
-                            },
-                            {
-                                date: '10:34pm',
-                                remitent: true,
-                                text: 'This is the message text'    
-                            },
-                            {
-                                date: '10:34pm',
-                                text: 'This is the message text of me'    
-                            }
-                        ]
-                    })}
                 </div>
             </div>
             `;
-            //Load functionality form animations
-            animations.animateChat(forms);
+            //Load functionality form animations (needs a userList)
+            animations.animateChat(forms, activeClients.map(item => item.username).filter(user => user != username));
             container.append(forms);
         },
         contactAnimation: usernames => {
@@ -348,35 +341,120 @@ const gen = {
             if(prev) prev.remove();
             document.querySelector("head").append(style);
         },
+        conversationList: config => {
+            const {userList, append} = config;
+            userList.forEach(username => {
+                append.append(gen.userChat.conversation({
+                    username: username
+                    /*messageList: [
+                        {
+                            date: '10:34pm',
+                            remitent: true,
+                            text: 'This is the message text'    
+                        }
+                    ]*/
+                }));
+            });
+        },
         conversation: config => {
             const {username, messageList} = config;
-            var messages = '';
-            messageList.forEach(message => {
-                const {date, text, remitent} = message;
-                messages += gen.userChat.message({
-                    date: date,
-                    text: text,
-                    remitent: remitent
-                });
-            });
-            var content = `
-            <div class="chat-content" id="chat-${username}">
+            const conversation = document.createElement("div");
+            conversation.classList.add("chat-content");
+            conversation.id = `chat-${username}`;
+            conversation.innerHTML = `
                 <h2 class="title">
                     @${username}
                 </h2>
-                <div class="message-container">${messages}</div>
+                <div class="message-container"></div>
                 <div class="controls flex-centered">
-                    <input type="text" placeholder="Escribe un mensaje...">
-                    <span class="icon-paperclip"></span>
+                    <input type="text" placeholder="Escribe un mensaje (o limpia el chat presionando: ctrl + shift + l)...">
+                    <div class="attach">
+                        <label class="icon-paperclip" for="attach-${username}"></label>
+                        <input type="file" id="attach-${username}" accept="image/x-png,image/gif,image/jpeg" />
+                    </div>
                 </div>
-            </div>
             `;
-            return content;
+            //Add functionality to chat input
+            const input = conversation.querySelector('.controls input[type="text"]');
+            const append = conversation.querySelector(".message-container");
+            const file = conversation.querySelector('.controls .attach input[type="file"]');
+            //Send message functionality
+            util.enterPressed(input, () => {
+                const value = input.value.trim();
+                //If value is not empty
+                if(!util.validate.empty(value)){
+                    const messageContent = {
+                        date: moment().format('LT'),
+                        text: value
+                    };
+                    //Send message to username
+                    socket.emit(`message_to_${username}`, messageContent);
+                    //Display message on chat
+                    append.append(gen.userChat.message(messageContent));
+                    //Clear input
+                    input.value = '';
+                    //Scroll chat to bottom
+                    util.scrollToBottom(append);
+                }
+            });
+            //Clear console functionality
+            util.multipleKeysPressed({
+                selector: input,
+                keys: ['control','shift','l'],
+                callback: () => {
+                    append.innerHTML = '';
+                }
+            });
+
+            //Add functionality to input file
+            file.addEventListener("change", () => {
+                const image = file.files[0];
+                const reader = new FileReader();
+
+                reader.addEventListener("load", function () {
+                    file.value = '';
+                    const messageContent = {
+                        date: moment().format('LT'),
+                        image: reader.result
+                    };
+                    //Send message to username
+                    socket.emit(`message_to_${username}`, messageContent);
+                    //Display message on chat
+                    append.append(gen.userChat.message(messageContent));
+                    //Scroll chat to bottom
+                    util.scrollToBottom(append);
+
+                }, false);
+
+                if(image) reader.readAsDataURL(image);
+            });
+
+            if(messageList){
+                messageList.forEach(message => {
+                    const {date, text, remitent} = message;
+                    append.append(gen.userChat.message({
+                        date: date,
+                        text: text,
+                        remitent: remitent
+                    }));
+                });
+            }
+            return conversation;
+        },
+        contactList: config => {
+            const {append, userList, chat} = config;
+            userList.forEach(username => {
+                append.append(gen.userChat.contact({
+                    username: username,
+                    chat: chat
+                }));
+            });
         },
         contact: config => {
-            const {username} = config;
-            const content = `
-            <li class="flex-centered contact-${username}">
+            const {username, chat} = config;
+            const contact = document.createElement("li");
+            contact.className = `flex-centered contact-${username}`;
+            contact.innerHTML = `
                 <div class="thumb">
                     <span class="messages flex-centered">
                         3
@@ -387,38 +465,54 @@ const gen = {
                     <span class="last-message">Help me open the door.</span>
                 </p>
                 <span class="time">3h</span>
-            </li>
             `;
-            return content;
+            util.toggleClick(contact, () => {
+                if(!chat.classList.contains(`on-${username}`)) chat.className = `chat flex-centered on-${username}`;
+            });
+            return contact;
         },
         message: config => {
-            const {date, text, remitent} = config;
-            let message = ``;
-            if(remitent) {
-                message += `
-                <div class="message left flex-centered">
-                    <div class="thumb flex-centered">
-                        <span class="date">${date}</span>
-                    </div>
-                    <div class="message-content">
-                        <span class="triangle"></span>
-                        <p>${text}</p>
-                    </div>
+            const {date, text, image, remitent} = config;
+            const message = document.createElement("div");
+            message.className = remitent ? 'message left flex-centered' : 'message right flex-centered';
+            //If message is an base64 image
+            if(image){
+                message.innerHTML = remitent ? `
+                <div class="thumb flex-centered">
+                    <span class="date">${date}</span>
                 </div>
-                `;
+                <div class="message-content image">
+                    <span class="triangle"></span>
+                    <img src="${image}">
+                </div>
+            ` : `
+                <div class="message-content image">
+                    <span class="triangle"></span>
+                    <img src="${image}">
+                </div>
+                <div class="thumb flex-centered">
+                    <span class="date">${date}</span>
+                </div>
+            `;
             }
-            else {
-                message += `
-                <div class="message right flex-centered">
-                    <div class="message-content">
-                        <span class="triangle"></span>
-                        <p>${text}</p>
-                    </div>
-                    <div class="thumb flex-centered">
-                        <span class="date">${date}</span>
-                    </div>
+            else{
+                message.innerHTML = remitent ? `
+                <div class="thumb flex-centered">
+                    <span class="date">${date}</span>
                 </div>
-                `;
+                <div class="message-content">
+                    <span class="triangle"></span>
+                    <p>${text}</p>
+                </div>
+            ` : `
+                <div class="message-content">
+                    <span class="triangle"></span>
+                    <p>${text}</p>
+                </div>
+                <div class="thumb flex-centered">
+                    <span class="date">${date}</span>
+                </div>
+            `;
             }
             return message;
         }
@@ -459,6 +553,10 @@ const kill = {
                 loader.remove();
             },600);
         },1000);
+    },
+    loginAndRegisterForms: () => {
+        const forms = container.querySelector("#forms");
+        forms.remove();
     },
     formNotification: append => {
         const prev = append.querySelector(".camp-container .notifications .notification");

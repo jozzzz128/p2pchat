@@ -22,7 +22,11 @@ const consults = {
     loginUser: data => {
         const {username, password, addr, id} = data;
         //If user doesn't exists
-        if(!consults.userExists({username: username, password: password}) || consults.getActiveUsers(username)) return false;
+        if(!consults.userExists({username: username, password: password}) || !consults.getActiveUsers(username)){
+            console.log(activeUsers);
+            console.log(`user '${username}' doesnt exists or is already active`);
+            return false;
+        }
         //Generate token
         const token = jwt.sign({ username: username }, process.env.TOKEN_KEY);
         //Return Token && Active user list
@@ -52,7 +56,7 @@ const consults = {
         //Check if user already active
         const alreadyActive = activeUsers.some(user => user.username == username);
         if(alreadyActive) return false;
-        else {
+        else if(username && addr && id){
             activeUsers.push({
                 username: username,
                 addr: addr,
@@ -67,6 +71,15 @@ const consults = {
                 }
             });
         }
+        else if(username) return true;
+    },
+    reloadActiveUsers: () => {
+        return activeUsers.map(user => {
+            return {
+                username: user.username,
+                addr: user.addr
+            }
+        });
     },
     removeActiveUser: id => {
         //Remove user from active users

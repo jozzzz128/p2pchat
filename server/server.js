@@ -12,6 +12,7 @@ io.on("connection", socket => {
         //Login from socket
         socket.on('login', data => {
             const {username, password, addr} = data;
+            console.log(`username: ${username}`);
             //Try to generate token
             const token = db.loginUser({
                 username: username,
@@ -71,6 +72,11 @@ io.on("connection", socket => {
         socket.on("disconnect", () => {
             console.log(`Disconnected from server, id: ${socket.id}`);
             io.emit("active", db.removeActiveUser(socket.id));
+        });
+
+        //Reload Active
+        socket.on("reloadActive", () => {
+            io.emit("active", db.reloadActiveUsers());
         });
 
     } catch (e) {
